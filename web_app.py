@@ -94,6 +94,52 @@ def elimina(id):
         # Cattura qualsiasi altro errore
         print(f"Errore durante l'eliminazione: {str(e)}")
         return jsonify({"error": "Si è verificato un errore durante l'eliminazione"}), 500  # 500 Internal Server Error
+@app.route("/aggiorna/<int:id>", methods=['PUT'])
+def aggiorna(id):
+    try:
+        # Recupera i dati JSON inviati nella richiesta
+        data = request.json
 
+        # Verifica che i dati inviati siano completi
+        if not data or "Città" not in data or "Paese" not in data or "Popolazione" not in data or "Monumenti_principali" not in data:
+            return jsonify({"error": "Dati incompleti"}), 400  # 400 Bad Request
+
+        # Estrai i valori dei dati
+        citta = data["Città"]
+        paese = data["Paese"]
+        popolazione = data["Popolazione"]
+        monumenti = data["Monumenti_principali"]
+
+        # Crea un cursore per eseguire le query
+        mycursor = mydb.cursor()
+
+        # Esegui la query per verificare se l'ID esiste
+        mycursor.execute("SELECT * FROM citta WHERE ID = %s", (id,))
+        citta_esistente = mycursor.fetchone()
+
+        if not citta_esistente:
+            return jsonify({"error": "Città non trovata"}), 404  # 404 Not Found
+
+        # Esegui la query di aggiornamento
+        query = """
+            UPDATE citta
+            SET Città = %s, Paese = %s, Popolazione = %s, Monumenti_principali = %s
+            WHERE ID = %s
+        """
+        mycursor.execute(query, (citta, paese, popolazione, monumenti, id))
+        mydb.commit()
+
+        # Restituisci una risposta di successo
+        return jsonify({"message": "Città aggiornata con successo"}), 200  # 200 OK
+
+    except mysql.connector.Error as err:
+        # Gestisci errori MySQL
+        print(f"Errore MySQL: {err}")
+        return jsonify({"error": f"Errore MySQL: {err}"}), 500  # 500 Internal Server Error
+
+    except Exception as e:
+        # Gestisci qualsiasi altro errore
+        print(f"Errore durante l'aggiornamento: {str(e)}")
+        return jsonify({"error": "Si è verificato un errore durante l'aggiornamento"}), 500  # 500 Internal Server Error
 if __name__ == "__main__":
     app.run(debug=True)
