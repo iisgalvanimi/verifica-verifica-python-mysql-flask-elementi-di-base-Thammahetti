@@ -1,3 +1,13 @@
+"""
+{
+  "Città": "Milano",
+  "Paese": "Italia",
+  "Popolazione": "2.8 milioni",
+  "Monumenti_principali": "Colosseo, Fontana di Trevi"
+}
+
+"""
+
 from flask import Flask, jsonify, request
 import mysql.connector
 import json
